@@ -253,9 +253,12 @@ fn handle_json(line: &str) -> String {
             JsonContext::Value => match ch {
                 // TODO: value object
                 // TODO: handle array
-                // TODO: boolean
                 '"' => state.context = JsonContext::ValueString,
-                '0'..='9' => state.context = JsonContext::ValueNumber,
+                '0'..='9' | 'a'..='z' => {
+                    // we don't want to be strict, so treat any unquoted strings as booleans
+                    state.current.push(ch);
+                    state.context = JsonContext::ValueNumber
+                }
                 ch => state.line.push(ch),
             },
             JsonContext::Key => {
