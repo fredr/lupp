@@ -60,6 +60,7 @@ enum JsonContext {
     Value,
     ValueString,
     ValueNumber,
+    ValueArray,
     Key,
 }
 struct JsonState {
@@ -251,8 +252,6 @@ fn handle_json(line: &str) -> String {
                 ch => state.line.push(ch),
             },
             JsonContext::Value => match ch {
-                // TODO: value object
-                // TODO: handle array
                 '"' => state.context = JsonContext::ValueString,
                 '0'..='9' | 'a'..='z' => {
                     // we don't want to be strict, so treat any unquoted strings as booleans
@@ -262,6 +261,10 @@ fn handle_json(line: &str) -> String {
                 '{' => {
                     color(Color::White, &ch.to_string(), &mut state.line);
                     state.context = JsonContext::None
+                }
+                '[' => {
+                    color(Color::White, &ch.to_string(), &mut state.line);
+                    state.context = JsonContext::ValueArray
                 }
                 ch => state.line.push(ch),
             },
@@ -323,6 +326,22 @@ fn handle_json(line: &str) -> String {
                     state.current_key = String::new();
                     state.current = String::new();
                     state.context = JsonContext::None;
+                }
+                ch => state.current.push(ch),
+            },
+            JsonContext::ValueArray => match ch {
+                ']' => {
+                    color(Color::Gray, &state.current, &mut state.line);
+                    color(Color::White, &ch.to_string(), &mut state.line);
+
+                    state.current = String::new();
+                    state.context = JsonContext::None;
+                }
+                ',' => {
+                    color(Color::Gray, &state.current, &mut state.line);
+                    color(Color::White, &ch.to_string(), &mut state.line);
+
+                    state.current = String::new();
                 }
                 ch => state.current.push(ch),
             },
