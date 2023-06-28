@@ -155,8 +155,8 @@ impl LogfmtState {
 
 fn write_key(key: &str, line: &mut String) {
     match key {
-        "severity" | "level" | "msg" | "message" | "time" | "ts" | "timestamp" | "trace_id"
-        | "span_path" => color(Color::White, key, line),
+        "severity" | "level" | "lvl" | "msg" | "message" | "time" | "ts" | "timestamp"
+        | "trace_id" | "span_path" => color(Color::White, key, line),
         "error" | "err" => color(Color::Red, key, line),
         _ => color(Color::Gray, key, line),
     }
@@ -258,6 +258,10 @@ fn handle_json(line: &str) -> String {
                     // we don't want to be strict, so treat any unquoted strings as booleans
                     state.current.push(ch);
                     state.context = JsonContext::ValueNumber
+                }
+                '{' => {
+                    color(Color::White, &ch.to_string(), &mut state.line);
+                    state.context = JsonContext::None
                 }
                 ch => state.line.push(ch),
             },
