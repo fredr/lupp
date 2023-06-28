@@ -4,5 +4,8 @@ version = "0.1.0"
 edition = "2021"
 authors = ["Fredrik Enestad"]
 license-file = "LICENSE"
+readme = "README.md"
+description = "Commandline tool for colorizing logs"
+categories = ["command-line-utilities", "development-tools::debugging"]
 
 [dependencies]
