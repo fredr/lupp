@@ -29,7 +29,7 @@ impl State {
     }
 }
 
-pub fn handle(line: &str) -> String {
+pub fn enhance(line: &str) -> String {
     let state = line.chars().fold(State::new(), |mut state, ch| {
         match state.context {
             Context::None => match ch {

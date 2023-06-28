@@ -1,4 +1,4 @@
-use lupp::format::{json, logfmt, LogFormat};
+use lupp::format::{self, json, logfmt, LogFormat};
 
 use std::io::{self, Write};
 
@@ -9,9 +9,9 @@ fn main() -> io::Result<()> {
     for line in stdin.lines() {
         let line = line.unwrap();
 
-        let mut line = match LogFormat::detect(&line) {
-            LogFormat::Json => json::handle(&line),
-            LogFormat::Logfmt => logfmt::handle(&line),
+        let mut line = match format::detect(&line) {
+            LogFormat::Json => json::enhance(&line),
+            LogFormat::Logfmt => logfmt::enhance(&line),
             LogFormat::Unknown | LogFormat::Colored => line,
         };
 
