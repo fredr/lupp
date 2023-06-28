@@ -9,7 +9,6 @@ enum Context {
     Key,
 }
 
-// TODO: fields should probably not be pub
 struct State {
     line: String,
     current: String,
