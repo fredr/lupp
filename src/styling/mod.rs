@@ -30,8 +30,8 @@ impl Default for Theme {
             info: StyleBuilder::new().color_green().bold().build(),
             warn: StyleBuilder::new().color_yellow().bold().build(),
             error: StyleBuilder::new().color_red().bold().build(),
-            fatal: StyleBuilder::new().color_red().bold().build(),
-            info_text: StyleBuilder::new().color_cyan().build(),
+            fatal: StyleBuilder::new().color_rgb(255, 0, 0).bold().build(),
+            info_text: StyleBuilder::new().color_256(45).bold().build(),
             error_text: StyleBuilder::new().color_red().build(),
             debug_text: StyleBuilder::new().color_magenta().build(),
         }
@@ -47,7 +47,7 @@ pub fn write_dimmed(text: &str, writer: &mut impl io::Write) -> io::Result<()> {
 
 pub fn write_key(key: &str, writer: &mut impl io::Write) -> io::Result<()> {
     THEME.with(|theme| match key {
-        "severity" | "level" | "lvl" | "msg" | "message" | "trace_id" | "span_path" => {
+        "severity" | "level" | "lvl" | "msg" | "message" | "trace_id" | "span_path" | "span" => {
             theme.highlight.write(key, writer)
         }
         "error" | "err" => theme.error.write(key, writer),
@@ -72,7 +72,7 @@ pub fn write_value(key: &str, value: &str, writer: &mut impl io::Write) -> io::R
         }
         "msg" | "message" => theme.info_text.write(value, writer),
         "error" | "err" => theme.error_text.write(value, writer),
-        "trace_id" | "span_path" => theme.debug_text.write(value, writer),
+        "trace_id" | "span_path" | "span" => theme.debug_text.write(value, writer),
         _ => theme.dim.write(value, writer),
     })
 }
@@ -185,6 +185,11 @@ impl StyleBuilder {
 
     pub fn color_256(mut self, color: u8) -> Self {
         self.style.color = Some(AnsiColor::Color256(color));
+        self
+    }
+
+    pub fn color_rgb(mut self, r: u8, g: u8, b: u8) -> Self {
+        self.style.color = Some(AnsiColor::RGB(r, g, b));
         self
     }
 }
