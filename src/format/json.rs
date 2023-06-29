@@ -33,9 +33,7 @@ pub fn enhance(line: &str, writer: &mut impl io::Write) -> io::Result<()> {
     line.chars().try_fold(State::new(), |mut state, ch| {
         match state.context {
             Context::None => match ch {
-                '{' | '}' | ',' => {
-                    styling::write_highlighted(&ch.to_string().as_str(), writer.by_ref())?
-                }
+                '{' | '}' | ',' => styling::write_highlighted(&ch.to_string().as_str(), writer)?,
                 '"' => state.context = Context::Key,
                 ':' => {
                     writer.write_all(&[b':'])?;
@@ -51,11 +49,11 @@ pub fn enhance(line: &str, writer: &mut impl io::Write) -> io::Result<()> {
                     state.context = Context::ValueNumber
                 }
                 '{' => {
-                    styling::write_highlighted(&ch.to_string().as_str(), writer.by_ref())?;
+                    styling::write_highlighted(&ch.to_string().as_str(), writer)?;
                     state.context = Context::None
                 }
                 '[' => {
-                    styling::write_highlighted(&ch.to_string().as_str(), writer.by_ref())?;
+                    styling::write_highlighted(&ch.to_string().as_str(), writer)?;
                     state.context = Context::ValueArray
                 }
                 ch => writer.write_all(&[ch as u8])?,
@@ -71,9 +69,9 @@ pub fn enhance(line: &str, writer: &mut impl io::Write) -> io::Result<()> {
                             state.current.push(ch);
                         }
                         '"' => {
-                            styling::write_dimmed("\"", writer.by_ref())?;
-                            styling::write_key(&state.current, writer.by_ref())?;
-                            styling::write_dimmed("\"", writer.by_ref())?;
+                            styling::write_dimmed("\"", writer)?;
+                            styling::write_key(&state.current, writer)?;
+                            styling::write_dimmed("\"", writer)?;
 
                             state.current_key = state.current;
 
@@ -81,7 +79,7 @@ pub fn enhance(line: &str, writer: &mut impl io::Write) -> io::Result<()> {
                             state.current = String::new();
                             state.context = Context::None;
                         }
-                        ch => writer.write_all(&[ch as u8])?,
+                        ch => state.current.push(ch),
                     }
                 }
             }
@@ -96,13 +94,9 @@ pub fn enhance(line: &str, writer: &mut impl io::Write) -> io::Result<()> {
                             state.current.push(ch);
                         }
                         '"' => {
-                            styling::write_dimmed("\"", writer.by_ref())?;
-                            styling::write_value(
-                                &state.current_key,
-                                &state.current,
-                                writer.by_ref(),
-                            )?;
-                            styling::write_dimmed("\"", writer.by_ref())?;
+                            styling::write_dimmed("\"", writer)?;
+                            styling::write_value(&state.current_key, &state.current, writer)?;
+                            styling::write_dimmed("\"", writer)?;
 
                             // reset state
                             state.current_key = String::new();
@@ -115,8 +109,8 @@ pub fn enhance(line: &str, writer: &mut impl io::Write) -> io::Result<()> {
             }
             Context::ValueNumber => match ch {
                 ',' | '}' => {
-                    styling::write_dimmed(&state.current, writer.by_ref())?;
-                    styling::write_highlighted(&ch.to_string(), writer.by_ref())?;
+                    styling::write_dimmed(&state.current, writer)?;
+                    styling::write_highlighted(&ch.to_string(), writer)?;
 
                     // reset state
                     state.current_key = String::new();
@@ -127,15 +121,15 @@ pub fn enhance(line: &str, writer: &mut impl io::Write) -> io::Result<()> {
             },
             Context::ValueArray => match ch {
                 ']' => {
-                    styling::write_dimmed(&state.current, writer.by_ref())?;
-                    styling::write_highlighted(&ch.to_string(), writer.by_ref())?;
+                    styling::write_dimmed(&state.current, writer)?;
+                    styling::write_highlighted(&ch.to_string(), writer)?;
 
                     state.current = String::new();
                     state.context = Context::None;
                 }
                 ',' => {
-                    styling::write_dimmed(&state.current, writer.by_ref())?;
-                    styling::write_highlighted(&ch.to_string(), writer.by_ref())?;
+                    styling::write_dimmed(&state.current, writer)?;
+                    styling::write_highlighted(&ch.to_string(), writer)?;
 
                     state.current = String::new();
                 }
