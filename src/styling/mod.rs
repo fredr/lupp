@@ -31,7 +31,7 @@ impl Default for Theme {
             warn: StyleBuilder::new().color_yellow().bold().build(),
             error: StyleBuilder::new().color_red().bold().build(),
             fatal: StyleBuilder::new().color_rgb(255, 0, 0).bold().build(),
-            info_text: StyleBuilder::new().color_256(45).bold().build(),
+            info_text: StyleBuilder::new().color_256(45).build(),
             error_text: StyleBuilder::new().color_red().build(),
             debug_text: StyleBuilder::new().color_magenta().build(),
         }
