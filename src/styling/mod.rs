@@ -47,9 +47,8 @@ pub fn write_dimmed(text: &str, writer: &mut impl io::Write) -> io::Result<()> {
 
 pub fn write_key(key: &str, writer: &mut impl io::Write) -> io::Result<()> {
     THEME.with(|theme| match key {
-        "severity" | "level" | "lvl" | "msg" | "message" | "trace_id" | "span_path" | "span" => {
-            theme.highlight.write(key, writer)
-        }
+        "severity" | "level" | "lvl" | "msg" | "message" | "status" | "status_code"
+        | "trace_id" | "span_path" | "span" => theme.highlight.write(key, writer),
         "error" | "err" => theme.error.write(key, writer),
         _ => theme.dim.write(key, writer),
     })
@@ -71,6 +70,7 @@ pub fn write_value(key: &str, value: &str, writer: &mut impl io::Write) -> io::R
             style.write(value, writer)
         }
         "msg" | "message" => theme.info_text.write(value, writer),
+        "status" | "status_code" => theme.highlight.write(value, writer),
         "error" | "err" => theme.error_text.write(value, writer),
         "trace_id" | "span_path" | "span" => theme.debug_text.write(value, writer),
         _ => theme.dim.write(value, writer),

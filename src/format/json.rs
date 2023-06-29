@@ -109,7 +109,7 @@ pub fn enhance(line: &str, writer: &mut impl io::Write) -> io::Result<()> {
             }
             Context::ValueNumber => match ch {
                 ',' | '}' => {
-                    styling::write_dimmed(&state.current, writer)?;
+                    styling::write_value(&state.current_key, &state.current, writer)?;
                     styling::write_highlighted(&ch.to_string(), writer)?;
 
                     // reset state
