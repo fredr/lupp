@@ -1,3 +1,5 @@
+use std::io;
+
 use crate::styling;
 
 enum Context {
@@ -6,7 +8,6 @@ enum Context {
 }
 
 struct State {
-    line: String,
     current: String,
     current_key: String,
     context: Context,
@@ -17,7 +18,6 @@ struct State {
 impl State {
     fn new() -> Self {
         Self {
-            line: String::new(),
             current: String::new(),
             current_key: String::new(),
             context: Context::Key,
@@ -27,8 +27,8 @@ impl State {
     }
 }
 
-pub fn enhance(line: &str) -> String {
-    let mut state = line.chars().fold(State::new(), |mut state, ch| {
+pub fn enhance(line: &str, writer: &mut impl io::Write) -> io::Result<()> {
+    let state = line.chars().try_fold(State::new(), |mut state, ch| {
         match state.context {
             Context::Value => {
                 if state.escaped {
@@ -48,9 +48,9 @@ pub fn enhance(line: &str) -> String {
                             styling::write_value(
                                 &state.current_key,
                                 &state.current,
-                                &mut state.line,
-                            );
-                            state.line.push(' ');
+                                writer.by_ref(),
+                            )?;
+                            writer.write(&[b' '])?;
 
                             // reset state
                             state.current = String::new();
@@ -63,8 +63,8 @@ pub fn enhance(line: &str) -> String {
             }
             Context::Key => match ch {
                 '=' => {
-                    styling::write_key(&state.current, &mut state.line);
-                    state.line.push('=');
+                    styling::write_key(&state.current, writer.by_ref())?;
+                    writer.write_all(&[b'='])?;
 
                     state.current_key = state.current;
 
@@ -76,11 +76,9 @@ pub fn enhance(line: &str) -> String {
             },
         }
 
-        state
-    });
+        Ok::<_, io::Error>(state)
+    })?;
 
     // write the last value
-    styling::write_value(&state.current_key, &state.current, &mut state.line);
-
-    state.line
+    styling::write_value(&state.current_key, &state.current, writer)
 }

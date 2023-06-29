@@ -1,3 +1,5 @@
+use std::io;
+
 const WHITE: &str = "\x1b[0;97m";
 const GREEN: &str = "\x1b[32m";
 const GRAY: &str = "\x1b[38;5;243m";
@@ -36,25 +38,23 @@ impl Color {
     }
 }
 
-pub fn write_with_color(color: Color, s: &str, line: &mut String) {
-    line.push_str(color.code());
-    line.push_str(s);
-    line.push_str(RESET);
+pub fn write_with_color(color: Color, s: &str, mut writer: impl io::Write) -> io::Result<()> {
+    writer.write_all(&[color.code().as_bytes(), s.as_bytes(), RESET.as_bytes()].concat())
 }
 
-pub fn write_key(key: &str, line: &mut String) {
+pub fn write_key(key: &str, writer: impl io::Write) -> io::Result<()> {
     match key {
         "severity" | "level" | "lvl" | "msg" | "message" | "time" | "ts" | "timestamp"
-        | "trace_id" | "span_path" => write_with_color(Color::White, key, line),
-        "error" | "err" => write_with_color(Color::Red, key, line),
-        _ => write_with_color(Color::Gray, key, line),
+        | "trace_id" | "span_path" => write_with_color(Color::White, key, writer),
+        "error" | "err" => write_with_color(Color::Red, key, writer),
+        _ => write_with_color(Color::Gray, key, writer),
     }
 }
 
-pub fn write_value(key: &str, value: &str, line: &mut String) {
+pub fn write_value(key: &str, value: &str, writer: impl io::Write) -> io::Result<()> {
     match key {
         "level" | "lvl" | "severity" => {
-            let c = match value {
+            let color = match value {
                 "trace" | "Trace" | "TRACE" => Color::Purple,
                 "debug" | "Debug" | "DEBUG" => Color::Blue,
                 "info" | "Info" | "INFO" => Color::Green,
@@ -64,12 +64,12 @@ pub fn write_value(key: &str, value: &str, line: &mut String) {
                 _ => Color::Gray,
             };
 
-            write_with_color(c, value, line);
+            write_with_color(color, value, writer)
         }
-        "msg" | "message" => write_with_color(Color::Cyan, value, line),
-        "error" | "err" => write_with_color(Color::Red, value, line),
-        "time" | "ts" | "timestamp" => write_with_color(Color::White, value, line),
-        "trace_id" | "span_path" => write_with_color(Color::Purple, value, line),
-        _ => write_with_color(Color::Gray, value, line),
+        "msg" | "message" => write_with_color(Color::Cyan, value, writer),
+        "error" | "err" => write_with_color(Color::Red, value, writer),
+        "time" | "ts" | "timestamp" => write_with_color(Color::White, value, writer),
+        "trace_id" | "span_path" => write_with_color(Color::Purple, value, writer),
+        _ => write_with_color(Color::Gray, value, writer),
     }
 }

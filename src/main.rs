@@ -9,14 +9,14 @@ fn main() -> io::Result<()> {
     for line in stdin.lines() {
         let line = line.unwrap();
 
-        let mut line = match format::detect(&line) {
-            LogFormat::Json => json::enhance(&line),
-            LogFormat::Logfmt => logfmt::enhance(&line),
-            LogFormat::Unknown | LogFormat::Colored => line,
+        match format::detect(&line) {
+            LogFormat::Json => json::enhance(&line, &mut stdout)?,
+            LogFormat::Logfmt => logfmt::enhance(&line, &mut stdout)?,
+            LogFormat::Unknown | LogFormat::Colored => stdout.write_all(line.as_bytes())?,
         };
 
-        line.push('\n');
-        stdout.write(line.as_bytes())?;
+        // write a newline as the lines iterator strips that away
+        stdout.write_all(&[b'\n'])?;
     }
 
     Ok(())
