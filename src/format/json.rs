@@ -1,6 +1,6 @@
 use std::io;
 
-use crate::styling::{self, Color};
+use crate::styling;
 
 enum Context {
     None,
@@ -34,7 +34,7 @@ pub fn enhance(line: &str, writer: &mut impl io::Write) -> io::Result<()> {
         match state.context {
             Context::None => match ch {
                 '{' | '}' | ',' => {
-                    styling::write_with_color(Color::White, &ch.to_string(), writer.by_ref())?
+                    styling::write_highlighted(&ch.to_string().as_str(), writer.by_ref())?
                 }
                 '"' => state.context = Context::Key,
                 ':' => {
@@ -51,11 +51,11 @@ pub fn enhance(line: &str, writer: &mut impl io::Write) -> io::Result<()> {
                     state.context = Context::ValueNumber
                 }
                 '{' => {
-                    styling::write_with_color(Color::White, &ch.to_string(), writer.by_ref())?;
+                    styling::write_highlighted(&ch.to_string().as_str(), writer.by_ref())?;
                     state.context = Context::None
                 }
                 '[' => {
-                    styling::write_with_color(Color::White, &ch.to_string(), writer.by_ref())?;
+                    styling::write_highlighted(&ch.to_string().as_str(), writer.by_ref())?;
                     state.context = Context::ValueArray
                 }
                 ch => writer.write_all(&[ch as u8])?,
@@ -71,9 +71,9 @@ pub fn enhance(line: &str, writer: &mut impl io::Write) -> io::Result<()> {
                             state.current.push(ch);
                         }
                         '"' => {
-                            styling::write_with_color(Color::Gray, "\"", writer.by_ref())?;
+                            styling::write_dimmed("\"", writer.by_ref())?;
                             styling::write_key(&state.current, writer.by_ref())?;
-                            styling::write_with_color(Color::Gray, "\"", writer.by_ref())?;
+                            styling::write_dimmed("\"", writer.by_ref())?;
 
                             state.current_key = state.current;
 
@@ -96,13 +96,13 @@ pub fn enhance(line: &str, writer: &mut impl io::Write) -> io::Result<()> {
                             state.current.push(ch);
                         }
                         '"' => {
-                            styling::write_with_color(Color::Gray, "\"", writer.by_ref())?;
+                            styling::write_dimmed("\"", writer.by_ref())?;
                             styling::write_value(
                                 &state.current_key,
                                 &state.current,
                                 writer.by_ref(),
                             )?;
-                            styling::write_with_color(Color::Gray, "\"", writer.by_ref())?;
+                            styling::write_dimmed("\"", writer.by_ref())?;
 
                             // reset state
                             state.current_key = String::new();
@@ -115,8 +115,8 @@ pub fn enhance(line: &str, writer: &mut impl io::Write) -> io::Result<()> {
             }
             Context::ValueNumber => match ch {
                 ',' | '}' => {
-                    styling::write_with_color(Color::Gray, &state.current, writer.by_ref())?;
-                    styling::write_with_color(Color::White, &ch.to_string(), writer.by_ref())?;
+                    styling::write_dimmed(&state.current, writer.by_ref())?;
+                    styling::write_highlighted(&ch.to_string(), writer.by_ref())?;
 
                     // reset state
                     state.current_key = String::new();
@@ -127,15 +127,15 @@ pub fn enhance(line: &str, writer: &mut impl io::Write) -> io::Result<()> {
             },
             Context::ValueArray => match ch {
                 ']' => {
-                    styling::write_with_color(Color::Gray, &state.current, writer.by_ref())?;
-                    styling::write_with_color(Color::White, &ch.to_string(), writer.by_ref())?;
+                    styling::write_dimmed(&state.current, writer.by_ref())?;
+                    styling::write_highlighted(&ch.to_string(), writer.by_ref())?;
 
                     state.current = String::new();
                     state.context = Context::None;
                 }
                 ',' => {
-                    styling::write_with_color(Color::Gray, &state.current, writer.by_ref())?;
-                    styling::write_with_color(Color::White, &ch.to_string(), writer.by_ref())?;
+                    styling::write_dimmed(&state.current, writer.by_ref())?;
+                    styling::write_highlighted(&ch.to_string(), writer.by_ref())?;
 
                     state.current = String::new();
                 }
