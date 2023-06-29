@@ -24,7 +24,7 @@ impl Default for Theme {
     fn default() -> Self {
         Self {
             highlight: StyleBuilder::new().color_white().build(),
-            dim: StyleBuilder::new().bold().color_256(242).build(),
+            dim: StyleBuilder::new().color_256(242).build(),
             trace: StyleBuilder::new().color_magenta().bold().build(),
             debug: StyleBuilder::new().color_blue().bold().build(),
             info: StyleBuilder::new().color_green().bold().build(),
