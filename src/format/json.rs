@@ -1,6 +1,6 @@
 use std::io;
 
-use crate::styling;
+use crate::styling::Theme;
 
 enum Context {
     None,
@@ -29,11 +29,11 @@ impl State {
     }
 }
 
-pub fn enhance(line: &str, writer: &mut impl io::Write) -> io::Result<()> {
+pub fn enhance(theme: &Theme, line: &str, writer: &mut impl io::Write) -> io::Result<()> {
     line.chars().try_fold(State::new(), |mut state, ch| {
         match state.context {
             Context::None => match ch {
-                '{' | '}' | ',' => styling::write_highlighted(&ch.to_string().as_str(), writer)?,
+                '{' | '}' | ',' => theme.write_highlighted(&ch.to_string().as_str(), writer)?,
                 '"' => state.context = Context::Key,
                 ':' => {
                     writer.write_all(&[b':'])?;
@@ -49,11 +49,11 @@ pub fn enhance(line: &str, writer: &mut impl io::Write) -> io::Result<()> {
                     state.context = Context::ValueNumber
                 }
                 '{' => {
-                    styling::write_highlighted(&ch.to_string().as_str(), writer)?;
+                    theme.write_highlighted(&ch.to_string().as_str(), writer)?;
                     state.context = Context::None
                 }
                 '[' => {
-                    styling::write_highlighted(&ch.to_string().as_str(), writer)?;
+                    theme.write_highlighted(&ch.to_string().as_str(), writer)?;
                     state.context = Context::ValueArray
                 }
                 ch => writer.write_all(&[ch as u8])?,
@@ -69,9 +69,9 @@ pub fn enhance(line: &str, writer: &mut impl io::Write) -> io::Result<()> {
                             state.current.push(ch);
                         }
                         '"' => {
-                            styling::write_dimmed("\"", writer)?;
-                            styling::write_key(&state.current, writer)?;
-                            styling::write_dimmed("\"", writer)?;
+                            theme.write_dimmed("\"", writer)?;
+                            theme.write_key(&state.current, writer)?;
+                            theme.write_dimmed("\"", writer)?;
 
                             state.current_key = state.current;
 
@@ -94,9 +94,9 @@ pub fn enhance(line: &str, writer: &mut impl io::Write) -> io::Result<()> {
                             state.current.push(ch);
                         }
                         '"' => {
-                            styling::write_dimmed("\"", writer)?;
-                            styling::write_value(&state.current_key, &state.current, writer)?;
-                            styling::write_dimmed("\"", writer)?;
+                            theme.write_dimmed("\"", writer)?;
+                            theme.write_value(&state.current_key, &state.current, writer)?;
+                            theme.write_dimmed("\"", writer)?;
 
                             // reset state
                             state.current_key = String::new();
@@ -109,8 +109,8 @@ pub fn enhance(line: &str, writer: &mut impl io::Write) -> io::Result<()> {
             }
             Context::ValueNumber => match ch {
                 ',' | '}' => {
-                    styling::write_value(&state.current_key, &state.current, writer)?;
-                    styling::write_highlighted(&ch.to_string(), writer)?;
+                    theme.write_value(&state.current_key, &state.current, writer)?;
+                    theme.write_highlighted(&ch.to_string(), writer)?;
 
                     // reset state
                     state.current_key = String::new();
@@ -121,15 +121,15 @@ pub fn enhance(line: &str, writer: &mut impl io::Write) -> io::Result<()> {
             },
             Context::ValueArray => match ch {
                 ']' => {
-                    styling::write_dimmed(&state.current, writer)?;
-                    styling::write_highlighted(&ch.to_string(), writer)?;
+                    theme.write_dimmed(&state.current, writer)?;
+                    theme.write_highlighted(&ch.to_string(), writer)?;
 
                     state.current = String::new();
                     state.context = Context::None;
                 }
                 ',' => {
-                    styling::write_dimmed(&state.current, writer)?;
-                    styling::write_highlighted(&ch.to_string(), writer)?;
+                    theme.write_dimmed(&state.current, writer)?;
+                    theme.write_highlighted(&ch.to_string(), writer)?;
 
                     state.current = String::new();
                 }
@@ -140,4 +140,31 @@ pub fn enhance(line: &str, writer: &mut impl io::Write) -> io::Result<()> {
     })?;
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_enhance_json() {
+        let log_row = r#"{"unimportant": "string", "msg": "hello world"}"#;
+        let mut writer = Vec::new();
+
+        let theme = Theme::default();
+
+        enhance(&theme, log_row, &mut writer).expect("enhance failed");
+
+        let enhanced =
+            String::from_utf8(writer).expect("couldn't convert enhanced log row into string");
+
+        assert!(enhanced.contains("\x1b"));
+        assert!(log_row.len() < enhanced.len());
+        assert!(
+            enhanced.contains("unimportant")
+                && enhanced.contains("string")
+                && enhanced.contains("msg")
+                && enhanced.contains("hello world")
+        );
+    }
 }

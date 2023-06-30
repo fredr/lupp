@@ -1,6 +1,7 @@
 pub mod json;
 pub mod logfmt;
 
+#[derive(PartialEq, Debug)]
 pub enum LogFormat {
     Json,
     Logfmt,
@@ -34,4 +35,35 @@ pub fn detect(line: &str) -> LogFormat {
     }
 
     LogFormat::Unknown
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_detect_format() {
+        let tests = [
+            (
+                r#"field=thing other="hello world" status=200"#,
+                LogFormat::Logfmt,
+            ),
+            (
+                r#"{"field": "value", "other": "hello world", "status": 200}"#,
+                LogFormat::Json,
+            ),
+            (
+                r#"{"field": "value", "[37mother": "hello world", "status": 200}[0m"#,
+                LogFormat::Colored,
+            ),
+            (
+                r#"This is not a strucutured log line, just some text"#,
+                LogFormat::Unknown,
+            ),
+        ];
+
+        for (log_row, expected_format) in tests {
+            assert_eq!(detect(log_row), expected_format)
+        }
+    }
 }

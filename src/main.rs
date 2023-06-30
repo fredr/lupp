@@ -1,4 +1,7 @@
-use lupp::format::{self, json, logfmt, LogFormat};
+use lupp::{
+    format::{self, json, logfmt, LogFormat},
+    styling,
+};
 
 use std::io::{self, Write};
 
@@ -6,12 +9,14 @@ fn main() -> io::Result<()> {
     let stdin = io::stdin();
     let mut stdout = io::stdout();
 
+    let theme = styling::Theme::default();
+
     for line in stdin.lines() {
         let line = line.unwrap();
 
         match format::detect(&line) {
-            LogFormat::Json => json::enhance(&line, &mut stdout)?,
-            LogFormat::Logfmt => logfmt::enhance(&line, &mut stdout)?,
+            LogFormat::Json => json::enhance(&theme, &line, &mut stdout)?,
+            LogFormat::Logfmt => logfmt::enhance(&theme, &line, &mut stdout)?,
             LogFormat::Unknown | LogFormat::Colored => stdout.write_all(line.as_bytes())?,
         };
 

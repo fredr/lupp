@@ -1,6 +1,6 @@
 use std::io;
 
-use crate::styling;
+use crate::styling::Theme;
 
 enum Context {
     Key,
@@ -27,7 +27,7 @@ impl State {
     }
 }
 
-pub fn enhance(line: &str, writer: &mut impl io::Write) -> io::Result<()> {
+pub fn enhance(theme: &Theme, line: &str, writer: &mut impl io::Write) -> io::Result<()> {
     let state = line.chars().try_fold(State::new(), |mut state, ch| {
         match state.context {
             Context::Value => {
@@ -45,7 +45,7 @@ pub fn enhance(line: &str, writer: &mut impl io::Write) -> io::Result<()> {
                             state.current.push(ch);
                         }
                         ' ' if !state.quoted => {
-                            styling::write_value(
+                            theme.write_value(
                                 &state.current_key,
                                 &state.current,
                                 writer.by_ref(),
@@ -63,7 +63,7 @@ pub fn enhance(line: &str, writer: &mut impl io::Write) -> io::Result<()> {
             }
             Context::Key => match ch {
                 '=' => {
-                    styling::write_key(&state.current, writer.by_ref())?;
+                    theme.write_key(&state.current, writer.by_ref())?;
                     writer.write_all(&[b'='])?;
 
                     state.current_key = state.current;
@@ -80,5 +80,32 @@ pub fn enhance(line: &str, writer: &mut impl io::Write) -> io::Result<()> {
     })?;
 
     // write the last value
-    styling::write_value(&state.current_key, &state.current, writer)
+    theme.write_value(&state.current_key, &state.current, writer)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_enhance_logfmt() {
+        let log_row = r#"unimportant=string msg="hello world"}"#;
+        let mut writer = Vec::new();
+
+        let theme = Theme::default();
+
+        enhance(&theme, log_row, &mut writer).expect("enhance failed");
+
+        let enhanced =
+            String::from_utf8(writer).expect("couldn't convert enhanced log row into string");
+
+        assert!(enhanced.contains("\x1b"));
+        assert!(log_row.len() < enhanced.len());
+        assert!(
+            enhanced.contains("unimportant")
+                && enhanced.contains("string")
+                && enhanced.contains("msg")
+                && enhanced.contains("hello world")
+        );
+    }
 }
