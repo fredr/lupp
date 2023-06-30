@@ -14,7 +14,7 @@ impl Style {
 
         if let Some(color) = &self.color {
             match color {
-                AnsiColor::RGB(r, g, b) => {
+                AnsiColor::Rgb(r, g, b) => {
                     // \x1b[38;2;{r};{g};{b}m
                     writer.write_all(
                         &[
@@ -104,7 +104,7 @@ impl StyleBuilder {
     }
 
     pub fn color_rgb(mut self, r: u8, g: u8, b: u8) -> Self {
-        self.style.color = Some(AnsiColor::RGB(r, g, b));
+        self.style.color = Some(AnsiColor::Rgb(r, g, b));
         self
     }
 }
@@ -112,7 +112,7 @@ impl StyleBuilder {
 // https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797#colors--graphics-mode
 
 pub enum AnsiColor {
-    RGB(u8, u8, u8),
+    Rgb(u8, u8, u8),
     Color16(u8),
     Color256(u8),
 }

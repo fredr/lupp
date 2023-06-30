@@ -33,7 +33,7 @@ pub fn enhance(theme: &Theme, line: &str, writer: &mut impl io::Write) -> io::Re
     line.chars().try_fold(State::new(), |mut state, ch| {
         match state.context {
             Context::None => match ch {
-                '{' | '}' | ',' => theme.write_highlighted(&ch.to_string().as_str(), writer)?,
+                '{' | '}' | ',' => theme.write_highlighted(ch.to_string().as_str(), writer)?,
                 '"' => state.context = Context::Key,
                 ':' => {
                     writer.write_all(&[b':'])?;
@@ -49,11 +49,11 @@ pub fn enhance(theme: &Theme, line: &str, writer: &mut impl io::Write) -> io::Re
                     state.context = Context::ValueNumber
                 }
                 '{' => {
-                    theme.write_highlighted(&ch.to_string().as_str(), writer)?;
+                    theme.write_highlighted(ch.to_string().as_str(), writer)?;
                     state.context = Context::None
                 }
                 '[' => {
-                    theme.write_highlighted(&ch.to_string().as_str(), writer)?;
+                    theme.write_highlighted(ch.to_string().as_str(), writer)?;
                     state.context = Context::ValueArray
                 }
                 ch => writer.write_all(&[ch as u8])?,
@@ -158,7 +158,7 @@ mod tests {
         let enhanced =
             String::from_utf8(writer).expect("couldn't convert enhanced log row into string");
 
-        assert!(enhanced.contains("\x1b"));
+        assert!(enhanced.contains('\x1b'));
         assert!(log_row.len() < enhanced.len());
         assert!(
             enhanced.contains("unimportant")

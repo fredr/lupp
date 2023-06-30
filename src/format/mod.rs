@@ -11,7 +11,7 @@ pub enum LogFormat {
 
 pub fn detect(line: &str) -> LogFormat {
     // if the line already contains colors, skip it
-    if line.contains("\x1b") {
+    if line.contains('\x1b') {
         return LogFormat::Colored;
     }
 

@@ -50,7 +50,7 @@ pub fn enhance(theme: &Theme, line: &str, writer: &mut impl io::Write) -> io::Re
                                 &state.current,
                                 writer.by_ref(),
                             )?;
-                            writer.write(&[b' '])?;
+                            writer.write_all(&[b' '])?;
 
                             // reset state
                             state.current = String::new();
@@ -99,7 +99,7 @@ mod tests {
         let enhanced =
             String::from_utf8(writer).expect("couldn't convert enhanced log row into string");
 
-        assert!(enhanced.contains("\x1b"));
+        assert!(enhanced.contains('\x1b'));
         assert!(log_row.len() < enhanced.len());
         assert!(
             enhanced.contains("unimportant")
