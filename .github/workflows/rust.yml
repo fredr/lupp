@@ -2,10 +2,10 @@ name: Rust
 
 on:
   push:
-    branches: 
+    branches:
     - main
   pull_request:
-    branches: 
+    branches:
     - main
 
 env:
@@ -13,7 +13,6 @@ env:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -22,3 +21,5 @@ jobs:
       run: cargo build --verbose
     - name: Run tests
       run: cargo test --verbose
+    - name: Clippy
+      run: cargo clippy -- -D warnings
