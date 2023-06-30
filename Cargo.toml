@@ -1,11 +1,12 @@
 [package]
 name = "lupp"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 authors = ["Fredrik Enestad"]
 license-file = "LICENSE"
 readme = "README.md"
 description = "Commandline tool for colorizing logs"
 categories = ["command-line-utilities", "development-tools::debugging"]
+repository = "https://github.com/fredr/lupp"
 
 [dependencies]
