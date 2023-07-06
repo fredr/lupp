@@ -4,6 +4,9 @@ Lupp is a small command line tool that can be used to enhance the experience whe
 
 It tries to highligh important parts of the log message, and brim down the contextual fields.
 
+![image](https://github.com/fredr/lupp/assets/762956/1accba6a-2352-4464-b57d-0c98c856c462)
+
+
 ## Install
 
 Via cargo
@@ -17,7 +20,7 @@ cargo install lupp
 Pipe logs from example `kubectl`
 
 ```bash
-kubectl logs -f -l name=grafana-agent --all-containers --max-log-requests 100 | lupp
+kubectl logs -f pod-name | lupp
 ```
 
 ## Caveat
