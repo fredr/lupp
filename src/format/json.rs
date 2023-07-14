@@ -37,7 +37,7 @@ pub fn enhance(theme: &Theme, line: &str, writer: &mut impl io::Write) -> io::Re
                 '"' => state.context = Context::Key,
                 ':' => {
                     writer.write_all(&[b':'])?;
-                    state.context = Context::Value
+                    state.context = Context::Value;
                 }
                 ch => writer.write_all(&[ch as u8])?,
             },
@@ -46,15 +46,15 @@ pub fn enhance(theme: &Theme, line: &str, writer: &mut impl io::Write) -> io::Re
                 '0'..='9' | 'a'..='z' => {
                     // we don't want to be strict, so treat any unquoted strings as booleans
                     state.current.push(ch);
-                    state.context = Context::ValueNumber
+                    state.context = Context::ValueNumber;
                 }
                 '{' => {
                     theme.write_highlighted(ch.to_string().as_str(), writer)?;
-                    state.context = Context::None
+                    state.context = Context::None;
                 }
                 '[' => {
                     theme.write_highlighted(ch.to_string().as_str(), writer)?;
-                    state.context = Context::ValueArray
+                    state.context = Context::ValueArray;
                 }
                 ch => writer.write_all(&[ch as u8])?,
             },

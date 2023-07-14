@@ -27,10 +27,10 @@ impl Style {
                             b"m",
                         ]
                         .concat(),
-                    )?
+                    )?;
                 }
                 AnsiColor::Color16(code) => {
-                    writer.write_all(&[b"\x1b[", code.to_string().as_bytes(), b"m"].concat())?
+                    writer.write_all(&[b"\x1b[", code.to_string().as_bytes(), b"m"].concat())?;
                 }
                 AnsiColor::Color256(code) => writer
                     .write_all(&[b"\x1b[38;5;", code.to_string().as_bytes(), b"m"].concat())?,

@@ -63,7 +63,7 @@ mod tests {
         ];
 
         for (log_row, expected_format) in tests {
-            assert_eq!(detect(log_row), expected_format)
+            assert_eq!(detect(log_row), expected_format);
         }
     }
 }
