@@ -1,5 +1,7 @@
 # lupp 🕵️
 
+[![Crates.io](https://img.shields.io/crates/v/lupp.svg)](https://crates.io/crates/lupp)
+
 Lupp is a small command line tool that can be used to enhance the experience when looking at logs in the terminal.
 
 It tries to highligh important parts of the log message, and brim down the contextual fields.
