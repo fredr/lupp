@@ -132,6 +132,6 @@ mod tests {
         assert_eq!(
             enhanced,
             r#"[DIM]somekey=[DIM]value [HIGHLIGHT]status=[HIGHLIGHT]ok [HIGHLIGHT]lvl=[INFO]info [HIGHLIGHT]msg=[INFO_TEXT]"Hello World""#
-        )
+        );
     }
 }
