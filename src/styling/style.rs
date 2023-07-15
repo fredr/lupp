@@ -1,13 +1,17 @@
 use std::io;
 
+pub trait Style {
+    fn write(&self, text: &str, writer: &mut impl io::Write) -> io::Result<()>;
+}
+
 #[derive(Default)]
-pub struct Style {
+pub struct AnsiStyle {
     bold: bool,
     color: Option<AnsiColor>,
 }
 
-impl Style {
-    pub fn write(&self, text: &str, writer: &mut impl io::Write) -> io::Result<()> {
+impl Style for AnsiStyle {
+    fn write(&self, text: &str, writer: &mut impl io::Write) -> io::Result<()> {
         if self.bold {
             writer.write_all(b"\x1b[1m")?;
         }
@@ -46,7 +50,7 @@ impl Style {
 
 #[derive(Default)]
 pub struct StyleBuilder {
-    style: Style,
+    style: AnsiStyle,
 }
 
 impl StyleBuilder {
@@ -56,7 +60,7 @@ impl StyleBuilder {
         }
     }
 
-    pub fn build(self) -> Style {
+    pub fn build(self) -> AnsiStyle {
         self.style
     }
 

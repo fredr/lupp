@@ -1,6 +1,6 @@
 use std::io;
 
-use crate::styling::Theme;
+use crate::styling::{Style, Theme};
 
 enum Context {
     None,
@@ -29,7 +29,11 @@ impl State {
     }
 }
 
-pub fn enhance(theme: &Theme, line: &str, writer: &mut impl io::Write) -> io::Result<()> {
+pub fn enhance<S: Style>(
+    theme: &Theme<S>,
+    line: &str,
+    writer: &mut impl io::Write,
+) -> io::Result<()> {
     line.chars().try_fold(State::new(), |mut state, ch| {
         match state.context {
             Context::None => match ch {

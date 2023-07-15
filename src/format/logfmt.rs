@@ -1,6 +1,6 @@
 use std::io;
 
-use crate::styling::Theme;
+use crate::styling::{Style, Theme};
 
 enum Context {
     Key,
@@ -27,7 +27,11 @@ impl State {
     }
 }
 
-pub fn enhance(theme: &Theme, line: &str, writer: &mut impl io::Write) -> io::Result<()> {
+pub fn enhance<S: Style>(
+    theme: &Theme<S>,
+    line: &str,
+    writer: &mut impl io::Write,
+) -> io::Result<()> {
     let state = line.chars().try_fold(State::new(), |mut state, ch| {
         match state.context {
             Context::Value => {
@@ -107,5 +111,27 @@ mod tests {
                 && enhanced.contains("msg")
                 && enhanced.contains("hello world")
         );
+    }
+
+    #[test]
+    fn test_logfmt_styling() {
+        use crate::styling::mock_theme;
+        let theme = mock_theme();
+        let mut writer = Vec::new();
+
+        enhance(
+            &theme,
+            r#"somekey=value status=ok lvl=info msg="Hello World""#,
+            &mut writer,
+        )
+        .expect("enhance failed");
+
+        let enhanced =
+            String::from_utf8(writer).expect("couldn't convert enhanced log row into string");
+
+        assert_eq!(
+            enhanced,
+            r#"[DIM]somekey=[DIM]value [HIGHLIGHT]status=[HIGHLIGHT]ok [HIGHLIGHT]lvl=[INFO]info [HIGHLIGHT]msg=[INFO_TEXT]"Hello World""#
+        )
     }
 }
