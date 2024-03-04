@@ -80,6 +80,8 @@ impl<S: Style> Theme<S> {
             "status" | "status_code" => self.highlight.write(value, writer),
             "error" | "err" => self.error_text.write(value, writer),
             "trace_id" | "span_path" | "span" => self.debug_text.write(value, writer),
+            key if key.ends_with("code") => self.highlight.write(value, writer),
+            key if key.ends_with("error") => self.error_text.write(value, writer),
             _ => self.dim.write(value, writer),
         }
     }
