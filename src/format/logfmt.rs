@@ -54,7 +54,7 @@ pub fn enhance<S: Style>(
                                 &state.current,
                                 writer.by_ref(),
                             )?;
-                            writer.write_all(&[b' '])?;
+                            writer.write_all(b" ")?;
 
                             // reset state
                             state.current = String::new();
@@ -68,7 +68,7 @@ pub fn enhance<S: Style>(
             Context::Key => match ch {
                 '=' => {
                     theme.write_key(&state.current, writer.by_ref())?;
-                    writer.write_all(&[b'='])?;
+                    writer.write_all(b"=")?;
 
                     state.current_key = state.current;
 

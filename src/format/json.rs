@@ -40,7 +40,7 @@ pub fn enhance<S: Style>(
                 '{' | '}' | ',' => theme.write_highlighted(ch.to_string().as_str(), writer)?,
                 '"' => state.context = Context::Key,
                 ':' => {
-                    writer.write_all(&[b':'])?;
+                    writer.write_all(b":")?;
                     state.context = Context::Value;
                 }
                 ch => writer.write_all(&[ch as u8])?,

@@ -21,7 +21,7 @@ fn main() -> io::Result<()> {
         };
 
         // write a newline as the lines iterator strips that away
-        stdout.write_all(&[b'\n'])?;
+        stdout.write_all(b"\n")?;
     }
 
     Ok(())
