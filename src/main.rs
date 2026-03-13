@@ -1,5 +1,5 @@
 use lupp::{
-    format::{self, json, logfmt, LogFormat},
+    format::{self, LogFormat, json, logfmt},
     styling,
 };
 
